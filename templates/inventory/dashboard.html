@@ -9,6 +9,7 @@
   <div class="stats">
     <div class="stat"><strong>{{ product_count }}</strong><span class="muted">Products</span></div>
     <div class="stat"><strong>{{ category_count }}</strong><span class="muted">Categories</span></div>
+    <div class="stat"><strong>{{ registered_user_count }}</strong><span class="muted">Registered Users</span></div>
   </div>
 
   <p class="section-title">Low stock (≤ 5)</p>
@@ -78,6 +79,28 @@
     </div>
     {% else %}
     <p class="empty">No sales yet.</p>
+    {% endif %}
+  </div>
+
+  <p class="section-title">Recent logins</p>
+  <div class="surface surface--tight">
+    {% if recent_logins %}
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>User</th><th>Email</th><th>Login Time</th></tr></thead>
+        <tbody>
+          {% for row in recent_logins %}
+          <tr>
+            <td>{{ row.user.username }}</td>
+            <td>{{ row.user.email }}</td>
+            <td>{{ row.login_at }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">No login data yet.</p>
     {% endif %}
   </div>
 </div>

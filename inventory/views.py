@@ -1,7 +1,7 @@
 from functools import wraps
 from urllib.parse import urlencode
 
-from accounts.models import UserProfile
+from accounts.models import LoginActivity, User, UserProfile
 from django.contrib import messages
 from django.db import transaction
 from django.db.models import DecimalField, ExpressionWrapper, F
@@ -277,15 +277,18 @@ def dashboard(request):
     low_stock = [p for p in products if p.quantity <= 5]
     recent_purchases = Purchase.objects.select_related('product', 'buyer').order_by('-date', '-id')[:5]
     recent_sales = Sale.objects.select_related('product', 'customer').order_by('-date', '-id')[:5]
+    recent_logins = LoginActivity.objects.select_related('user').order_by('-login_at', '-id')[:10]
     return render(
         request,
         'inventory/dashboard.html',
         {
             'product_count': len(products),
             'category_count': Category.objects.count(),
+            'registered_user_count': User.objects.count(),
             'low_stock': low_stock[:10],
             'recent_purchases': recent_purchases,
             'recent_sales': recent_sales,
+            'recent_logins': recent_logins,
         },
     )
 
