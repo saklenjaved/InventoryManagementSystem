@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}{% if is_buy_flow %}Buy product{% else %}Record sale{% endif %} · IMS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <h1>{% if is_buy_flow %}Complete purchase{% else %}Record sale{% endif %}</h1>
+    <p class="page-lead muted">{% if is_buy_flow %}Confirm quantity and price. Stock will decrease when you submit.{% else %}Quantity cannot exceed available stock for the product.{% endif %}</p>
+  </div>
+  <div class="surface" style="max-width:32rem;">
+    <form method="post" novalidate>{% csrf_token %}
+      <label for="id_product">Product</label>{{ form.product }}{{ form.product.errors }}
+      <div class="form-grid cols-2">
+        <div>
+          <label for="id_quantity">Quantity</label>{{ form.quantity }}{{ form.quantity.errors }}
+        </div>
+        <div>
+          <label for="id_price">Unit price</label>{{ form.price }}{{ form.price.errors }}
+        </div>
+      </div>
+      <div class="surface surface--tight" style="margin-top:1rem;margin-bottom:0.25rem;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="muted" style="font-weight:600;">Total amount</span>
+          <strong id="order-total" style="font-size:1.1rem;">0.00</strong>
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">{% if is_buy_flow %}Place order{% else %}Save sale{% endif %}</button>
+        <a class="btn" href="{% url 'shop_home' %}">Shop</a>
+        <a class="btn" href="{% url 'inventory:sale_list' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  (function () {
+    var qtyInput = document.getElementById('id_quantity');
+    var priceInput = document.getElementById('id_price');
+    var totalEl = document.getElementById('order-total');
+
+    function toNumber(value) {
+      var n = Number(value);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function updateTotal() {
+      var qty = toNumber(qtyInput && qtyInput.value);
+      var price = toNumber(priceInput && priceInput.value);
+      var total = qty * price;
+      totalEl.textContent = total.toFixed(2);
+    }
+
+    if (qtyInput) qtyInput.addEventListener('input', updateTotal);
+    if (priceInput) priceInput.addEventListener('input', updateTotal);
+    updateTotal();
+  })();
+</script>
+{% endblock %}

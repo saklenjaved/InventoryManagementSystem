@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Categories · IMS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <h1>Categories</h1>
+    <p class="page-lead muted">Group products for clearer reporting and cataloguing.</p>
+  </div>
+  <div class="toolbar">
+    <a class="btn btn-primary" href="{% url 'inventory:category_add' %}">Add category</a>
+  </div>
+  <div class="surface surface--tight">
+    {% if categories %}
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Name</th><th class="cell-actions">Actions</th></tr></thead>
+        <tbody>
+          {% for c in categories %}
+          <tr>
+            <td><strong>{{ c.name }}</strong></td>
+            <td class="cell-actions">
+              <a href="{% url 'inventory:category_edit' c.pk %}">Edit</a>
+              <a href="{% url 'inventory:category_delete' c.pk %}">Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">No categories yet. Add one to get started.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

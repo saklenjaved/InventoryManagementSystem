@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Sign in · IMS{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block content %}
+<div class="page auth-card">
+  <div class="page-head">
+    <h1>Welcome back</h1>
+    <p class="page-lead muted">Enter the same username, email, and password you used at signup.</p>
+  </div>
+  <div class="surface">
+    <form method="post" action="" novalidate>
+      {% csrf_token %}
+      {% if login_next %}
+      <input type="hidden" name="next" value="{{ login_next }}">
+      {% endif %}
+      {{ form.non_field_errors }}
+      <label for="id_username">Username</label>
+      {{ form.username }}
+      {{ form.username.errors }}
+      <label for="id_email">Email</label>
+      {{ form.email }}
+      {{ form.email.errors }}
+      <label for="id_password">Password</label>
+      {{ form.password }}
+      {{ form.password.errors }}
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">Sign in</button>
+      </div>
+    </form>
+  </div>
+  <p class="auth-foot muted">No account? <a href="{% url 'accounts:register' %}">Create one</a></p>
+</div>
+{% endblock %}

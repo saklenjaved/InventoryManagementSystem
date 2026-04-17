@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% block title %}Shop · IMS{% endblock %}
+{% block extra_css %}
+<style>
+  .shop-hero {
+    background: linear-gradient(135deg, #0d9488 0%, #0f766e 40%, #134e4a 100%);
+    color: #ecfdf5;
+    border-radius: var(--radius);
+    padding: 2rem 1.5rem;
+    margin-bottom: 1.75rem;
+    box-shadow: var(--shadow-md);
+  }
+  .shop-hero h1 { margin: 0 0 0.5rem; font-size: 1.75rem; letter-spacing: -0.03em; color: #fff; }
+  .shop-hero p { margin: 0; opacity: 0.92; max-width: 36rem; font-size: 0.95rem; }
+  .shop-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+  .shop-filters span { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-right: 0.35rem; }
+  .chip {
+    display: inline-flex;
+    padding: 0.4rem 0.85rem;
+    border-radius: 999px;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    border: 1px solid var(--line-strong);
+    background: var(--surface);
+    color: var(--ink-soft);
+  }
+  .chip:hover { border-color: var(--brand); color: var(--brand); text-decoration: none; }
+  .chip.is-active { background: var(--brand-muted); border-color: var(--brand); color: var(--brand-hover); }
+  .shop-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1.25rem;
+  }
+  .product-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .product-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
+  .product-card__body { padding: 1.1rem 1.2rem 1.25rem; flex: 1; display: flex; flex-direction: column; }
+  .product-card__cat { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--brand); margin-bottom: 0.35rem; }
+  .product-card__title { font-size: 1.05rem; font-weight: 700; margin: 0 0 0.5rem; color: var(--ink); letter-spacing: -0.02em; }
+  .product-card__desc { font-size: 0.8125rem; color: var(--muted); margin: 0 0 1rem; flex: 1; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .product-card__meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; }
+  .product-card__price { font-size: 1.2rem; font-weight: 700; color: var(--ink); }
+  .product-card__stock { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
+  .product-card__actions { margin-top: auto; }
+  .product-card__actions .btn { width: 100%; justify-content: center; }
+  .shop-empty { text-align: center; padding: 3rem 1.5rem; color: var(--muted); }
+</style>
+{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="shop-hero">
+    <h1>IMS Shop</h1>
+    <p>Browse products without signing in, add items to cart, then checkout. Login is required only at checkout. Admins use the same sign-in page.</p>
+  </div>
+
+  <div class="shop-filters">
+    <span>Category</span>
+    <a class="chip {% if not active_category %}is-active{% endif %}" href="{% url 'shop_home' %}">All</a>
+    {% for c in categories %}
+    <a class="chip {% if active_category == c.pk %}is-active{% endif %}" href="{% url 'shop_home' %}?category={{ c.pk }}">{{ c.name }}</a>
+    {% endfor %}
+  </div>
+
+  {% if shop_cards %}
+  <div class="shop-grid">
+    {% for row in shop_cards %}
+    {% with p=row.product %}
+    <article class="product-card">
+      <div class="product-card__body">
+        <div class="product-card__cat">{{ p.category.name }}</div>
+        <h2 class="product-card__title">{{ p.name }}</h2>
+        <p class="product-card__desc">{{ p.description }}</p>
+        <div class="product-card__meta">
+          <span class="product-card__price">${{ p.price }}</span>
+          <span class="product-card__stock">{% if p.quantity > 0 %}{{ p.quantity }} in stock{% else %}Out of stock{% endif %}</span>
+        </div>
+        <div class="product-card__actions">
+          {% if p.quantity > 0 %}
+          <form method="post" action="{% url 'inventory:cart_add' p.pk %}">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="btn btn-primary">Add to cart</button>
+          </form>
+          {% if row.in_cart_qty %}
+          <p class="muted" style="margin:0.6rem 0 0;text-align:center;">In cart: {{ row.in_cart_qty }}</p>
+          {% endif %}
+          {% else %}
+          <span class="btn" style="opacity:0.6;cursor:not-allowed;">Out of stock</span>
+          {% endif %}
+        </div>
+      </div>
+    </article>
+    {% endwith %}
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="surface shop-empty">
+    <p>No products in this category yet.</p>
+    {% if accounts_user and accounts_user.role == 'admin' %}
+    <p style="margin-top:0.75rem;"><a href="{% url 'inventory:product_add' %}">Add products in inventory</a></p>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

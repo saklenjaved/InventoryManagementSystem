@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Checkout · IMS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <h1>Checkout</h1>
+    <p class="page-lead muted">Unit price is taken automatically from each product.</p>
+  </div>
+
+  <div class="surface surface--tight">
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr><th>Product</th><th class="num">Unit price</th><th class="num">Qty</th><th class="num">Line total</th></tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            <td>{{ row.product.name }}</td>
+            <td class="num">{{ row.unit_price }}</td>
+            <td class="num">{{ row.quantity }}</td>
+            <td class="num">{{ row.line_total }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="surface" style="max-width:30rem;">
+    <h2>Payment summary</h2>
+    <div class="callout" style="margin-bottom:1rem;">
+      <strong>Delivery address</strong>
+      <p style="margin:0.45rem 0 0;">{{ delivery_address }}</p>
+      <p class="muted" style="margin:0.45rem 0 0;">{{ profile.first_name }} {{ profile.last_name }}{% if profile.phone %} · {{ profile.phone }}{% endif %}</p>
+    </div>
+    <p style="display:flex;justify-content:space-between;align-items:center;margin:0 0 1rem;">
+      <span class="muted">Total payable</span>
+      <strong style="font-size:1.25rem;">{{ grand_total }}</strong>
+    </p>
+    <form method="post">
+      {% csrf_token %}
+      <label style="display:flex;gap:0.55rem;align-items:flex-start;margin-bottom:0.9rem;">
+        <input type="checkbox" name="confirm_address" value="yes" style="width:auto;max-width:none;margin-top:0.1rem;">
+        <span style="font-size:0.88rem;color:var(--ink-soft);">Yes, place this order on the same address.</span>
+      </label>
+      <p class="muted" style="margin:-0.25rem 0 0.9rem;">
+        Need to change address? <a href="{% url 'accounts:profile' %}">Update profile address</a>
+      </p>
+      <div class="actions" style="margin-top:0;">
+        <a class="btn" href="{% url 'inventory:cart' %}">Back to cart</a>
+        <button type="submit" class="btn btn-primary">Place order</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

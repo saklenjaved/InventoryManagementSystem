@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Delete category · IMS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <h1>Delete category</h1>
+    <p class="page-lead muted">This action cannot be undone.</p>
+  </div>
+  <div class="surface" style="max-width:32rem;">
+    <div class="callout" style="margin-bottom:1.25rem;">
+      Deleting <strong>{{ object.name }}</strong> will also remove related products (cascade).
+    </div>
+    <form method="post">{% csrf_token %}
+      <div class="actions" style="margin-top:0;">
+        <button type="submit" class="btn btn-danger">Delete category</button>
+        <a class="btn" href="{% url 'inventory:category_list' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

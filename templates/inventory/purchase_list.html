@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% block title %}Purchases · IMS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <h1>Purchases</h1>
+    <p class="page-lead muted">Inbound stock: recording a purchase increases quantity.</p>
+  </div>
+  <div class="toolbar">
+    <a class="btn btn-primary" href="{% url 'inventory:purchase_add' %}">Record purchase</a>
+  </div>
+  <div class="surface surface--tight">
+    {% if purchases %}
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr><th>Date</th><th>Product</th><th class="num">Qty</th><th class="num">Price</th><th>Buyer</th></tr>
+        </thead>
+        <tbody>
+          {% for row in purchases %}
+          <tr>
+            <td>{{ row.date }}</td>
+            <td>{{ row.product.name }}</td>
+            <td class="num">{{ row.quantity }}</td>
+            <td class="num">{{ row.price }}</td>
+            <td>{{ row.buyer.username }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">No purchases recorded yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

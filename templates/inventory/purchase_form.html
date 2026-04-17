@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Record purchase · IMS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <h1>Record purchase</h1>
+    <p class="page-lead muted">Stock for the selected product will increase by the quantity you enter.</p>
+  </div>
+  <div class="surface" style="max-width:32rem;">
+    <form method="post" novalidate>{% csrf_token %}
+      <label for="id_product">Product</label>{{ form.product }}{{ form.product.errors }}
+      <div class="form-grid cols-2">
+        <div>
+          <label for="id_quantity">Quantity</label>{{ form.quantity }}{{ form.quantity.errors }}
+        </div>
+        <div>
+          <label for="id_price">Unit price</label>{{ form.price }}{{ form.price.errors }}
+        </div>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">Save purchase</button>
+        <a class="btn" href="{% url 'inventory:purchase_list' %}">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

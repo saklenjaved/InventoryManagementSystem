@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Cart · IMS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <h1>Your cart</h1>
+    <p class="page-lead muted">Review quantities before checkout.</p>
+  </div>
+
+  {% if rows %}
+  <div class="surface surface--tight">
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr><th>Product</th><th>Category</th><th class="num">Unit price</th><th class="num">Qty</th><th class="num">Line total</th><th class="cell-actions">Actions</th></tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            <td>{{ row.product.name }}</td>
+            <td>{{ row.product.category.name }}</td>
+            <td class="num">{{ row.unit_price }}</td>
+            <td class="num">
+              <form method="post" action="{% url 'inventory:cart_update' row.product.pk %}" style="display:flex;gap:0.4rem;justify-content:flex-end;align-items:center;">
+                {% csrf_token %}
+                <input name="quantity" type="number" min="0" value="{{ row.quantity }}" style="max-width:72px;padding:0.35rem 0.5rem;">
+                <button type="submit" class="btn">Update</button>
+              </form>
+            </td>
+            <td class="num">{{ row.line_total }}</td>
+            <td class="cell-actions">
+              <form method="post" action="{% url 'inventory:cart_remove' row.product.pk %}" style="display:inline;">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">Remove</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="surface" style="max-width:30rem;">
+    <h2>Cart summary</h2>
+    <p style="display:flex;justify-content:space-between;align-items:center;margin:0 0 1rem;">
+      <span class="muted">Grand total</span>
+      <strong style="font-size:1.25rem;">{{ grand_total }}</strong>
+    </p>
+    <div class="actions" style="margin-top:0;">
+      <a class="btn" href="{% url 'shop_home' %}">Continue shopping</a>
+      <a class="btn btn-primary" href="{% url 'inventory:cart_checkout' %}">Proceed to checkout</a>
+    </div>
+    {% if not accounts_user %}
+    <p class="muted" style="margin-top:0.9rem;">You can keep adding items as guest. Login is required only at checkout.</p>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="surface">
+    <p class="empty" style="margin:0;">Your cart is empty.</p>
+    <div class="actions" style="justify-content:center;margin-top:0.8rem;">
+      <a class="btn btn-primary" href="{% url 'shop_home' %}">Browse products</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}{% if my_orders_only %}My orders{% else %}Sales{% endif %} · IMS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <h1>{% if my_orders_only %}My orders{% else %}Sales (all){% endif %}</h1>
+    <p class="page-lead muted">{% if my_orders_only %}Your purchases from the shop.{% else %}All customer orders (admin view).{% endif %}</p>
+  </div>
+  <div class="toolbar">
+    <a class="btn btn-primary" href="{% if my_orders_only %}{% url 'shop_home' %}{% else %}{% url 'inventory:sale_add' %}{% endif %}">{% if my_orders_only %}Shop products{% else %}Record sale{% endif %}</a>
+    <a class="btn" href="{% url 'shop_home' %}">Back to shop</a>
+  </div>
+  <div class="surface surface--tight">
+    {% if sales %}
+    <div class="table-wrap">
+      <table class="data">
+        <thead>
+          <tr><th>Date</th><th>Product</th><th class="num">Qty</th><th class="num">Unit price</th><th class="num">Total</th>{% if not my_orders_only %}<th>Customer</th>{% endif %}</tr>
+        </thead>
+        <tbody>
+          {% for row in sales %}
+          <tr>
+            <td>{{ row.date }}</td>
+            <td>{{ row.product.name }}</td>
+            <td class="num">{{ row.quantity }}</td>
+            <td class="num">{{ row.price }}</td>
+            <td class="num">{{ row.total_amount }}</td>
+            {% if not my_orders_only %}
+            <td>{{ row.customer.username }}</td>
+            {% endif %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">No orders yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

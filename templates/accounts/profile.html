@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Profile · IMS{% endblock %}
+{% block content %}
+<div class="page">
+  {% if is_admin %}
+  <div class="page-head">
+    <h1>Administrator profile</h1>
+    <p class="page-lead muted">Your account has full access to inventory. Update your contact details below.</p>
+  </div>
+  <div class="surface surface--tight" style="margin-bottom:1.25rem;border-color:#99f6e4;background:linear-gradient(135deg,#ecfdf5,#f0fdfa);">
+    <p style="margin:0;font-size:0.875rem;font-weight:600;color:#0f766e;">Role: {{ account.get_role_display }} — use the navigation bar to open Overview, categories, products, purchases, and sales.</p>
+  </div>
+  {% else %}
+  <div class="page-head">
+    <h1>Member profile</h1>
+    <p class="page-lead muted">Standard user account: manage your personal contact information here. Inventory screens are not available for this role.</p>
+  </div>
+  <div class="surface surface--tight" style="margin-bottom:1.25rem;">
+    <p style="margin:0;font-size:0.875rem;color:var(--muted);">Role: <strong>{{ account.get_role_display }}</strong> — your home in IMS is this profile page.</p>
+  </div>
+  {% endif %}
+
+  <div class="profile-grid">
+    <div class="surface surface--tight">
+      <h2>Account</h2>
+      <span class="badge">{{ account.get_role_display }}</span>
+      <dl class="dl-rows" style="margin-top:1rem;">
+        <dt>Username</dt>
+        <dd>{{ account.username }}</dd>
+        <dt>Email</dt>
+        <dd>{{ account.email }}</dd>
+      </dl>
+      {% if is_admin %}
+      <p class="muted" style="margin-top:1.25rem;margin-bottom:0;font-size:0.8125rem;">
+        <a href="{% url 'inventory:dashboard' %}">Open inventory overview →</a>
+      </p>
+      {% endif %}
+    </div>
+    <div class="surface">
+      <h2>{% if is_admin %}Administrator contact{% else %}Your contact details{% endif %}</h2>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="form-grid cols-2">
+          <div>
+            <label for="id_first_name">First name</label>
+            {{ form.first_name }}{{ form.first_name.errors }}
+          </div>
+          <div>
+            <label for="id_last_name">Last name</label>
+            {{ form.last_name }}{{ form.last_name.errors }}
+          </div>
+        </div>
+        <label for="id_phone">Phone</label>
+        {{ form.phone }}{{ form.phone.errors }}
+        <label for="id_address">Address</label>
+        {{ form.address }}{{ form.address.errors }}
+        <div class="form-grid cols-2">
+          <div>
+            <label for="id_city">City</label>
+            {{ form.city }}{{ form.city.errors }}
+          </div>
+          <div>
+            <label for="id_state">State</label>
+            {{ form.state }}{{ form.state.errors }}
+          </div>
+        </div>
+        <div class="actions" style="margin-top:1rem;">
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

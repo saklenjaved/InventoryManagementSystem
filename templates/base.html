@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}IMS{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0c1222;
+      --ink-soft: #3d4a63;
+      --muted: #64748b;
+      --line: #e2e8f0;
+      --line-strong: #cbd5e1;
+      --surface: #ffffff;
+      --canvas: #f4f6f9;
+      --canvas-accent: linear-gradient(165deg, #ecfeff 0%, #f8fafc 45%, #fff7ed 100%);
+      --brand: #0d9488;
+      --brand-hover: #0f766e;
+      --brand-muted: rgba(13, 148, 136, 0.12);
+      --accent-warm: #ea580c;
+      --danger: #dc2626;
+      --danger-soft: rgba(220, 38, 38, 0.08);
+      --shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+      --shadow-md: 0 4px 24px rgba(15, 23, 42, 0.08);
+      --radius: 14px;
+      --radius-sm: 10px;
+      --font: "Plus Jakarta Sans", system-ui, sans-serif;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-font-smoothing: antialiased; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font);
+      font-size: 0.9375rem;
+      color: var(--ink);
+      background: var(--canvas);
+      background-image: var(--canvas-accent);
+      background-attachment: fixed;
+      line-height: 1.55;
+    }
+    a {
+      color: var(--brand);
+      font-weight: 500;
+      text-decoration: none;
+    }
+    a:hover { color: var(--brand-hover); text-decoration: underline; }
+    .site-header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--line);
+      box-shadow: var(--shadow);
+    }
+    .site-header__inner {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 0.65rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem 1.25rem;
+    }
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+      color: var(--ink);
+      text-decoration: none;
+    }
+    .brand:hover { text-decoration: none; color: var(--brand); }
+    .brand-mark {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 8px;
+      background: linear-gradient(135deg, var(--brand), #14b8a6);
+      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.35);
+    }
+    .brand span:last-child { opacity: 0.92; }
+    .nav-links {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.15rem 0.25rem;
+      flex: 1;
+    }
+    .nav-links a {
+      padding: 0.45rem 0.75rem;
+      border-radius: 8px;
+      color: var(--ink-soft);
+      font-weight: 500;
+      font-size: 0.875rem;
+    }
+    .nav-links a:hover {
+      background: var(--brand-muted);
+      color: var(--brand-hover);
+      text-decoration: none;
+    }
+    .nav-user {
+      font-size: 0.8125rem;
+      color: var(--muted);
+    }
+    .nav-user a { font-weight: 600; }
+    main.site-main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 1.75rem 1.5rem 3.5rem;
+    }
+    .messages {
+      list-style: none;
+      margin: 0 0 1.25rem;
+      padding: 0;
+    }
+    .messages li {
+      padding: 0.75rem 1rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: 1px solid transparent;
+    }
+    .messages .success { background: #ecfdf5; color: #047857; border-color: #a7f3d0; }
+    .messages .error { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
+    .messages .warning { background: #fffbeb; color: #b45309; border-color: #fde68a; }
+    .messages .info { background: #f8fafc; color: var(--ink-soft); border-color: var(--line); }
+    .page { animation: fadeIn 0.35s ease; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: none; }
+    }
+    .page-head {
+      margin-bottom: 1.5rem;
+    }
+    .page-head h1 {
+      margin: 0 0 0.35rem;
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+    }
+    .page-lead {
+      margin: 0;
+      max-width: 42rem;
+    }
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .surface {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-md);
+      padding: 1.35rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .surface--tight { padding: 1rem 1.25rem; }
+    .surface h2, .surface .h2 {
+      margin: 0 0 1rem;
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+    }
+    .section-title {
+      font-size: 0.8125rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--muted);
+      margin: 2rem 0 0.75rem;
+    }
+    .section-title:first-child { margin-top: 0; }
+    .table-wrap {
+      overflow-x: auto;
+      margin: 0 -0.25rem;
+      border-radius: var(--radius-sm);
+    }
+    table.data {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.875rem;
+    }
+    table.data th,
+    table.data td {
+      text-align: left;
+      padding: 0.65rem 0.85rem;
+      border-bottom: 1px solid var(--line);
+    }
+    table.data th {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      background: #f8fafc;
+    }
+    table.data tbody tr:hover { background: #fafbfc; }
+    table.data tbody tr:last-child td { border-bottom: none; }
+    table.data td.num { font-variant-numeric: tabular-nums; }
+    .cell-actions { white-space: nowrap; text-align: right; }
+    .cell-actions a { margin-left: 0.75rem; }
+    .cell-actions a:first-child { margin-left: 0; }
+    .empty {
+      margin: 0;
+      padding: 1.25rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.875rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      padding: 0.55rem 1.1rem;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      color: var(--ink-soft);
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .btn:hover {
+      background: #f8fafc;
+      text-decoration: none;
+      color: var(--ink);
+    }
+    .btn-primary {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(13, 148, 136, 0.25);
+    }
+    .btn-primary:hover {
+      background: var(--brand-hover);
+      border-color: var(--brand-hover);
+      color: #fff;
+      filter: none;
+    }
+    .btn-danger {
+      background: var(--danger-soft);
+      border-color: rgba(220, 38, 38, 0.35);
+      color: var(--danger);
+    }
+    .btn-danger:hover {
+      background: #fef2f2;
+      color: #991b1b;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1.25rem; }
+    .form-grid {
+      display: grid;
+      gap: 1rem 1.25rem;
+    }
+    @media (min-width: 640px) {
+      .form-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+    }
+    label {
+      display: block;
+      margin-bottom: 0.35rem;
+      font-size: 0.8125rem;
+      font-weight: 600;
+      color: var(--ink-soft);
+    }
+    input, select, textarea {
+      width: 100%;
+      max-width: 100%;
+      padding: 0.6rem 0.85rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--line-strong);
+      background: #fafbfc;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: 0.9375rem;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--brand);
+      background: #fff;
+      box-shadow: 0 0 0 3px var(--brand-muted);
+    }
+    textarea { min-height: 6rem; resize: vertical; }
+    .errorlist {
+      margin: 0.35rem 0 0;
+      padding: 0;
+      list-style: none;
+      color: var(--danger);
+      font-size: 0.8125rem;
+      font-weight: 500;
+    }
+    .muted { color: var(--muted); font-size: 0.875rem; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .stat {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 1.15rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .stat strong {
+      display: block;
+      font-size: 1.75rem;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      color: var(--ink);
+      line-height: 1.2;
+    }
+    .stat .muted { margin-top: 0.2rem; display: block; font-weight: 500; }
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      background: var(--brand-muted);
+      color: var(--brand-hover);
+    }
+    .site-footer {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 1.5rem;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+    }
+    /* Auth pages */
+    body.auth-page .site-main { max-width: 440px; }
+    body.auth-page .page-head h1 { font-size: 1.5rem; }
+    .auth-card .surface { padding: 1.75rem; }
+    .auth-foot {
+      text-align: center;
+      margin-top: 1.25rem;
+      font-size: 0.875rem;
+    }
+    .divider-label {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 1.25rem 0 0.75rem;
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+    }
+    .divider-label::before,
+    .divider-label::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--line);
+    }
+    @media (min-width: 880px) {
+      .profile-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 1.25rem;
+        align-items: start;
+      }
+    }
+    .dl-rows dt {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--muted);
+      margin-top: 0.85rem;
+    }
+    .dl-rows dt:first-child { margin-top: 0; }
+    .dl-rows dd { margin: 0.2rem 0 0; font-weight: 500; color: var(--ink); }
+    .callout {
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.1rem;
+      background: #fffbeb;
+      border: 1px solid #fde68a;
+      color: #92400e;
+      font-size: 0.875rem;
+    }
+  </style>
+  {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+  <header class="site-header">
+    <div class="site-header__inner">
+      <a class="brand" href="{% url 'shop_home' %}">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span>IMS</span>
+      </a>
+      <nav class="nav-links" aria-label="Main">
+        <a href="{% url 'shop_home' %}">Shop</a>
+        <a href="{% url 'inventory:cart' %}">Cart{% if cart_count %} ({{ cart_count }}){% endif %}</a>
+        {% if accounts_user %}
+        {% if accounts_user.role == 'admin' %}
+        <a href="{% url 'inventory:dashboard' %}">Overview</a>
+        <a href="{% url 'inventory:category_list' %}">Categories</a>
+        <a href="{% url 'inventory:product_list' %}">Products</a>
+        <a href="{% url 'inventory:purchase_list' %}">Purchases</a>
+        <a href="{% url 'inventory:sale_list' %}">Sales</a>
+        {% else %}
+        <a href="{% url 'inventory:sale_list' %}">My orders</a>
+        {% endif %}
+        <a href="{% url 'accounts:profile' %}">Profile</a>
+        {% endif %}
+      </nav>
+      {% if accounts_user %}
+      <span class="nav-user">{{ accounts_user.username }} · <a href="{% url 'accounts:logout' %}">Sign out</a></span>
+      {% else %}
+      <span class="nav-user"><a href="{% url 'accounts:login' %}">Sign in</a> · <a href="{% url 'accounts:register' %}">Register</a></span>
+      {% endif %}
+    </div>
+  </header>
+  <main class="site-main">
+    {% if messages %}
+    <ul class="messages">
+      {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="site-footer">IMS · Inventory management</footer>
+</body>
+</html>

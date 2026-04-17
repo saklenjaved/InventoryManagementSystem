@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Dashboard · IMS{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="page-head">
+    <h1>Overview</h1>
+    <p class="page-lead muted">Stock health and recent movement at a glance.</p>
+  </div>
+  <div class="stats">
+    <div class="stat"><strong>{{ product_count }}</strong><span class="muted">Products</span></div>
+    <div class="stat"><strong>{{ category_count }}</strong><span class="muted">Categories</span></div>
+  </div>
+
+  <p class="section-title">Low stock (≤ 5)</p>
+  {% if low_stock %}
+  <div class="surface surface--tight">
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Product</th><th>Category</th><th class="num">Qty</th></tr></thead>
+        <tbody>
+          {% for p in low_stock %}
+          <tr>
+            <td>{{ p.name }}</td>
+            <td>{{ p.category.name }}</td>
+            <td class="num">{{ p.quantity }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% else %}
+  <div class="surface surface--tight">
+    <p class="empty" style="margin:0;">No low-stock items right now.</p>
+  </div>
+  {% endif %}
+
+  <p class="section-title">Recent purchases</p>
+  <div class="surface surface--tight">
+    {% if recent_purchases %}
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Date</th><th>Product</th><th class="num">Qty</th><th>Buyer</th></tr></thead>
+        <tbody>
+          {% for row in recent_purchases %}
+          <tr>
+            <td>{{ row.date }}</td>
+            <td>{{ row.product.name }}</td>
+            <td class="num">{{ row.quantity }}</td>
+            <td>{{ row.buyer.username }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">No purchases yet.</p>
+    {% endif %}
+  </div>
+
+  <p class="section-title">Recent sales</p>
+  <div class="surface surface--tight">
+    {% if recent_sales %}
+    <div class="table-wrap">
+      <table class="data">
+        <thead><tr><th>Date</th><th>Product</th><th class="num">Qty</th><th>Customer</th></tr></thead>
+        <tbody>
+          {% for row in recent_sales %}
+          <tr>
+            <td>{{ row.date }}</td>
+            <td>{{ row.product.name }}</td>
+            <td class="num">{{ row.quantity }}</td>
+            <td>{{ row.customer.username }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="empty">No sales yet.</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
