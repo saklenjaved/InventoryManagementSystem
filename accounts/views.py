@@ -12,7 +12,7 @@ from .models import LoginActivity, User, UserProfile
 
 @require_http_methods(['GET', 'POST'])
 def login_view(request):
-    current_user = request.accounts_user
+    current_user = request.accounts_user                             # user_id session check by middleware
     if current_user:
         if current_user.role == 'admin':
             return redirect('inventory:dashboard')
@@ -124,3 +124,4 @@ def profile_view(request):
             'is_admin': user.role == 'admin',
         },
     )
+    

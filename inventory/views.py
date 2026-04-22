@@ -16,7 +16,7 @@ from .models import Category, Product, Purchase, Sale
 
 
 def inventory_admin_required(view_func):
-    @wraps(view_func)
+    @wraps(view_func)                                       # decorator that wrap function view and checks user login and admin.role
     def wrapper(request, *args, **kwargs):
         user = getattr(request, 'accounts_user', None)
         if not user:
@@ -37,7 +37,7 @@ def inventory_admin_required(view_func):
 class InventoryAdminRequiredMixin:
     """Require signed-in accounts.User with role admin."""
 
-    def dispatch(self, request, *args, **kwargs):
+    def dispatch(self, request, *args, **kwargs):                           # mixin that dispatch with class based views and checks admin role
         user = getattr(request, 'accounts_user', None)
         if not user:
             login_url = reverse('accounts:login')
@@ -64,49 +64,51 @@ class LoggedInAccountsMixin:
 
 
 def _get_cart(request):
+    # get cart from user 
     return request.session.get('cart', {})
 
 
 def _save_cart(request, cart):
+    # saves changed cart in session
     request.session['cart'] = cart
     request.session.modified = True
 
 
 def _cart_rows(cart):
-    product_ids = [int(pid) for pid in cart.keys() if str(pid).isdigit()]
+    product_ids = [int(pid) for pid in cart.keys() if str(pid).isdigit()]       # listing cart ID's
     if not product_ids:
         return []
-    products = Product.objects.select_related('category').filter(pk__in=product_ids)
-    product_map = {str(p.pk): p for p in products}
-    rows = []
-    for pid, qty in cart.items():
-        product = product_map.get(str(pid))
+    products = Product.objects.select_related('category').filter(pk__in=product_ids)      # fetch products from DB
+    product_map = {str(p.pk): p for p in products}          # create dict for fast look up and easily find products
+    rows = []                                               # create final list and store cart items
+    for pid, qty in cart.items():               # process with each products
+        product = product_map.get(str(pid))                 # get products by their ID
         if not product:
             continue
-        quantity = int(qty)
-        line_total = product.price * quantity
+        quantity = int(qty)             # convert string into integer
+        line_total = product.price * quantity           # calculate the total price of one product
         rows.append(
             {
                 'product': product,
                 'quantity': quantity,
                 'unit_price': product.price,
                 'line_total': line_total,
-            }
+                }
         )
     return rows
 
 
 def shop_home(request):
     """Public storefront: browse products without logging in."""
-    categories = Category.objects.all().order_by('name')
-    products = Product.objects.select_related('category').order_by('category__name', 'name')
-    cat_param = request.GET.get('category')
-    if cat_param and str(cat_param).isdigit():
-        products = products.filter(category_id=int(cat_param))
-    products = list(products)
-    cart = _get_cart(request)
-    shop_cards = []
-    for p in products:
+    categories = Category.objects.all().order_by('name')       # get all categories and sorting them by name
+    products = Product.objects.select_related('category').order_by('category__name', 'name')    # sorintg them by cateories, 1st cat_name and p.name
+    cat_param = request.GET.get('category')     # get cat.id
+    if cat_param and str(cat_param).isdigit():      # checks value, if category is valid number then continue 
+        products = products.filter(category_id=int(cat_param))      # filters the product category wise
+    products = list(products)      # create list 
+    cart = _get_cart(request)           
+    shop_cards = []             # store final data
+    for p in products:  
         shop_cards.append(
             {
                 'product': p,
@@ -126,7 +128,7 @@ def shop_home(request):
 
 @require_http_methods(['POST'])
 def cart_add(request, product_id):
-    product = Product.objects.filter(pk=product_id).first()
+    product = Product.objects.filter(pk=product_id).first()     # get product from ID
     if not product:
         messages.error(request, 'Product not found.')
         return redirect('shop_home')
@@ -134,14 +136,14 @@ def cart_add(request, product_id):
         messages.error(request, 'This product is out of stock.')
         return redirect(request.POST.get('next') or 'shop_home')
     try:
-        qty = int(request.POST.get('quantity', 1))
-    except (TypeError, ValueError):
-        qty = 1
-    qty = max(1, qty)
-    cart = _get_cart(request)
-    key = str(product.pk)
-    new_qty = int(cart.get(key, 0)) + qty
-    if new_qty > product.quantity:
+        qty = int(request.POST.get('quantity', 1))        # user select quantity
+    except (TypeError, ValueError):    
+        qty = 1                                         # default 1 quantity select
+    qty = max(1, qty)                           
+    cart = _get_cart(request)               # get cart from session
+    key = str(product.pk)           
+    new_qty = int(cart.get(key, 0)) + qty       # calculate new quantity with old quantity
+    if new_qty > product.quantity:                 
         new_qty = product.quantity
         messages.warning(request, f'Only {product.quantity} units available.')
     cart[key] = new_qty
@@ -151,12 +153,12 @@ def cart_add(request, product_id):
 
 
 def cart_detail(request):
-    rows = _cart_rows(_get_cart(request))
-    grand_total = sum((r['line_total'] for r in rows), 0)
+    rows = _cart_rows(_get_cart(request))      # convert in cart in rows format
+    grand_total = sum((r['line_total'] for r in rows), 0)      # total sum of all products 
     return render(
         request,
         'inventory/cart.html',
-        {
+        {                                   # render page in template
             'rows': rows,
             'grand_total': grand_total,
         },
@@ -165,17 +167,17 @@ def cart_detail(request):
 
 @require_http_methods(['POST'])
 def cart_update(request, product_id):
-    cart = _get_cart(request)
-    key = str(product_id)
+    cart = _get_cart(request)       
+    key = str(product_id)        # convert p.id in string
     if key not in cart:
         return redirect('inventory:cart')
     try:
-        qty = int(request.POST.get('quantity', 1))
+        qty = int(request.POST.get('quantity', 1))         # quantity users added
     except (TypeError, ValueError):
         qty = 1
-    product = Product.objects.filter(pk=product_id).first()
-    if not product:
-        cart.pop(key, None)
+    product = Product.objects.filter(pk=product_id).first()      # checks products exist or not
+    if not product:                 
+        cart.pop(key, None)                 # if not, so remove from cart
         _save_cart(request, cart)
         messages.info(request, 'Product removed from cart because it no longer exists.')
         return redirect('inventory:cart')
@@ -186,7 +188,7 @@ def cart_update(request, product_id):
         if qty > product.quantity:
             qty = product.quantity
             messages.warning(request, f'Only {product.quantity} units available.')
-        cart[key] = qty
+        cart[key] = qty             # update and save
     _save_cart(request, cart)
     return redirect('inventory:cart')
 
@@ -194,7 +196,7 @@ def cart_update(request, product_id):
 @require_http_methods(['POST'])
 def cart_remove(request, product_id):
     cart = _get_cart(request)
-    cart.pop(str(product_id), None)
+    cart.pop(str(product_id), None)             # removes item from cart
     _save_cart(request, cart)
     messages.info(request, 'Item removed from cart.')
     return redirect('inventory:cart')
@@ -202,14 +204,14 @@ def cart_remove(request, product_id):
 
 @require_http_methods(['GET', 'POST'])
 def cart_checkout(request):
-    if not getattr(request, 'accounts_user', None):
+    if not getattr(request, 'accounts_user', None):             # if user not login then redirect login
         login_url = reverse('accounts:login')
         query = urlencode({'next': reverse('inventory:cart_checkout')})
         return redirect(f'{login_url}?{query}')
 
     profile, _ = UserProfile.objects.get_or_create(
-        user=request.accounts_user,
-        defaults={
+        user=request.accounts_user,                     # get user profile
+        defaults={                      
             'first_name': request.accounts_user.username,
             'last_name': '',
             'phone': '',
@@ -219,7 +221,7 @@ def cart_checkout(request):
         },
     )
     address_parts = [profile.address, profile.city, profile.state]
-    delivery_address = ', '.join([part for part in address_parts if part])
+    delivery_address = ', '.join([part for part in address_parts if part])    # combine address, city, state
     if not delivery_address:
         messages.warning(
             request,
@@ -227,20 +229,20 @@ def cart_checkout(request):
         )
         return redirect('accounts:profile')
 
-    rows = _cart_rows(_get_cart(request))
-    if not rows:
+    rows = _cart_rows(_get_cart(request))           # get cart data in rows        
+    if not rows:                                
         messages.warning(request, 'Your cart is empty.')
         return redirect('inventory:cart')
 
-    grand_total = sum((r['line_total'] for r in rows), 0)
+    grand_total = sum((r['line_total'] for r in rows), 0)               # total calculate
     if request.method == 'POST':
-        if request.POST.get('confirm_address') != 'yes':
+        if request.POST.get('confirm_address') != 'yes':                # user confirms and select checkbox if addrress are confirm
             messages.error(request, 'Please confirm this delivery address to place the order.')
             return redirect('inventory:cart_checkout')
-        with transaction.atomic():
+        with transaction.atomic():                  # all cart product orders are works together.  if one product is false, all oproducts order can cancel
             for row in rows:
-                product = Product.objects.select_for_update().get(pk=row['product'].pk)
-                qty = row['quantity']
+                product = Product.objects.select_for_update().get(pk=row['product'].pk)    # locks the DB row
+                qty = row['quantity']       # quantity of user ordered                                            # whenever this product can not buyed, nothing else products can changed.
                 if product.quantity < qty:
                     messages.error(
                         request,
@@ -250,12 +252,12 @@ def cart_checkout(request):
                 product.quantity -= qty
                 product.save()
                 Sale.objects.create(
-                    product=product,
+                    product=product,                # saved order in DB
                     quantity=qty,
                     price=product.price,
                     customer=request.accounts_user,
                 )
-        _save_cart(request, {})
+        _save_cart(request, {})             # save cart
         messages.success(request, f'Checkout complete. Total amount: {grand_total}')
         return redirect('inventory:sale_list')
 
@@ -271,10 +273,10 @@ def cart_checkout(request):
     )
 
 
-@inventory_admin_required
+@inventory_admin_required         # admin login required for opens dashboard
 def dashboard(request):
-    products = list(Product.objects.select_related('category').all())
-    low_stock = [p for p in products if p.quantity <= 5]
+    products = list(Product.objects.select_related('category').all())       # lists of all products
+    low_stock = [p for p in products if p.quantity <= 5]                # low stock products when there stock are 5 or lower  
     recent_purchases = Purchase.objects.select_related('product', 'buyer').order_by('-date', '-id')[:5]
     recent_sales = Sale.objects.select_related('product', 'customer').order_by('-date', '-id')[:5]
     recent_logins = LoginActivity.objects.select_related('user').order_by('-login_at', '-id')[:10]
@@ -294,20 +296,20 @@ def dashboard(request):
 
 
 class CategoryListView(InventoryAdminRequiredMixin, ListView):
-    model = Category
-    template_name = 'inventory/category_list.html'
+    model = Category                                        # ListView = built-in djando view
+    template_name = 'inventory/category_list.html'         # show category list for only admin 
     context_object_name = 'categories'
 
 
 class CategoryCreateView(InventoryAdminRequiredMixin, CreateView):
     model = Category
     form_class = CategoryForm
-    template_name = 'inventory/category_form.html'
+    template_name = 'inventory/category_form.html'              # for new category create 
     success_url = reverse_lazy('inventory:category_list')
 
     def form_valid(self, form):
         messages.success(self.request, 'Category created.')
-        return super().form_valid(form)
+        return super().form_valid(form)             # super() calls the parent class method 
 
 
 class CategoryUpdateView(InventoryAdminRequiredMixin, UpdateView):
@@ -406,17 +408,17 @@ class SaleListView(LoggedInAccountsMixin, ListView):
 
     def get_queryset(self):
         qs = Sale.objects.select_related('product', 'customer').annotate(
-            total_amount=ExpressionWrapper(
+            total_amount=ExpressionWrapper(                                     # fetch the data and annotate can calculate all orders
                 F('quantity') * F('price'),
                 output_field=DecimalField(max_digits=12, decimal_places=2),
             )
         ).order_by('-date', '-id')
-        if self.request.accounts_user.role != 'admin':
-            qs = qs.filter(customer=self.request.accounts_user)
+        if self.request.accounts_user.role != 'admin':                      # order by date and id and showing only admin
+            qs = qs.filter(customer=self.request.accounts_user)             # user can show only his orders
         return qs
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
+        ctx = super().get_context_data(**kwargs)                    # user can shows only his own orderss not the all orders
         ctx['my_orders_only'] = self.request.accounts_user.role != 'admin'
         return ctx
 
@@ -427,22 +429,22 @@ class SaleCreateView(LoggedInAccountsMixin, CreateView):
     template_name = 'inventory/sale_form.html'
     success_url = reverse_lazy('inventory:sale_list')
 
-    def get_initial(self):
+    def get_initial(self):                          # get data (default data)
         initial = super().get_initial()
-        pid = self.request.GET.get('product')
-        if pid and str(pid).isdigit():
-            initial['product'] = int(pid)
+        pid = self.request.GET.get('product')           # get product id
+        if pid and str(pid).isdigit():              
+            initial['product'] = int(pid)               # if product.id in url, fill product field automaitcally
         return initial
 
     def get_context_data(self, **kwargs):
-        ctx = super().get_context_data(**kwargs)
-        ctx['is_buy_flow'] = bool(self.request.GET.get('product'))
+        ctx = super().get_context_data(**kwargs)                
+        ctx['is_buy_flow'] = bool(self.request.GET.get('product'))          # if product in url : True - buy
         return ctx
 
     def form_valid(self, form):
         sale = form.save(commit=False)
-        sale.customer = self.request.accounts_user
-        with transaction.atomic():
+        sale.customer = self.request.accounts_user          
+        with transaction.atomic():                  
             product = Product.objects.select_for_update().get(pk=sale.product_id)
             if product.quantity < sale.quantity:
                 form.add_error('quantity', 'Not enough stock on hand for this sale.')
