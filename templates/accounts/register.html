@@ -52,10 +52,21 @@
         </div>
       </div>
       <div class="actions">
-        <button type="submit" class="btn btn-primary">Register</button>
+        <button type="submit" class="btn btn-primary" id="register-submit">Register</button>
       </div>
     </form>
   </div>
   <p class="auth-foot muted">Already registered? <a href="{% url 'accounts:login' %}">Sign in</a></p>
 </div>
+<script>
+  (function () {
+    var form = document.querySelector('.auth-card form');
+    var btn = document.getElementById('register-submit');
+    if (!form || !btn) return;
+    form.addEventListener('submit', function () {
+      btn.disabled = true;
+      btn.textContent = 'Creating account…';
+    });
+  })();
+</script>
 {% endblock %}

@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Admin Overview</h2>
+<br>
+<h5>Total Stock: {{ total_stock }}</h5> <br>
+<div class="row text-center">
+    <div class="col">
+        <a href="{% url 'product_list' %}">
+            <div class="card">
+                <h4>Total Products</h4>
+                <h2>{{products_count}}</h2>
+            </div>
+        </a>
+    </div>
+
+    <div class="col">
+        <a href="{% url 'category_list' %}">
+            <div class="card">
+                <h4>Total Categories</h4>
+                <h2>{{categories_count}}</h2>
+            </div>
+        </a>
+    </div>
+
+    <div class="col">
+        <a href="{% url 'purchase_list' %}">
+            <div class="card">
+                <h4>Total Purchases</h4>
+                <h2>{{purchase_count}}</h2>
+            </div>
+        </a>
+    </div>
+
+    <div class="col">
+        <a href="{% url 'sell_list' %}">
+            <div class="card">
+                <h4>Total Sells</h4>
+                <h2>{{sell_count}}</h2>
+            </div>
+        </a>
+    </div>
+</div> <br>
+<br><hr> <p class="text-muted" style="text-align: center;">@ Inventory Management</p> 
+{% endblock  %}

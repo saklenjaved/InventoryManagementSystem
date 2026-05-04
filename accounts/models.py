@@ -1,22 +1,22 @@
+from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.db import models
 
 
-class User(models.Model):
+class User(AbstractUser):
     ROLE_CHOICES = [
         ('admin', 'Admin'),
         ('user', 'User'),
     ]
-    username = models.CharField(max_length=100)
-    password = models.CharField(max_length=128)
     email = models.EmailField(unique=True)
-    role = models.CharField(max_length=100, choices=ROLE_CHOICES)
+    role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='user')
 
     def __str__(self):
         return self.username
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     phone = models.CharField(max_length=100)
@@ -29,7 +29,7 @@ class UserProfile(models.Model):
 
 
 class LoginActivity(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     login_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

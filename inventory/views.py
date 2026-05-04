@@ -1,10 +1,12 @@
 from functools import wraps
 from urllib.parse import urlencode
 
-from accounts.models import LoginActivity, User, UserProfile
+from accounts.models import LoginActivity, UserProfile
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import DecimalField, ExpressionWrapper, F
+from django.conf import settings
 from django.shortcuts import redirect, render
 from django.urls import reverse, reverse_lazy
 from django.views.decorators.http import require_http_methods
@@ -13,6 +15,9 @@ from django.views.generic.edit import CreateView, UpdateView
 
 from .forms import CategoryForm, ProductForm, PurchaseForm, SaleForm
 from .models import Category, Product, Purchase, Sale
+from .weather import fetch_current_weather
+
+User = get_user_model()
 
 
 def inventory_admin_required(view_func):
@@ -115,6 +120,11 @@ def shop_home(request):
                 'in_cart_qty': int(cart.get(str(p.pk), 0)),
             }
         )
+    weather = fetch_current_weather(
+        settings.WEATHER_LATITUDE,
+        settings.WEATHER_LONGITUDE,
+        settings.WEATHER_LOCATION_LABEL,
+    )
     return render(
         request,
         'inventory/shop.html',
@@ -122,6 +132,7 @@ def shop_home(request):
             'categories': categories,
             'shop_cards': shop_cards,
             'active_category': int(cat_param) if cat_param and str(cat_param).isdigit() else None,
+            'weather': weather,
         },
     )
 
@@ -455,161 +466,3 @@ class SaleCreateView(LoggedInAccountsMixin, CreateView):
         total = sale.quantity * sale.price
         messages.success(self.request, f'Order placed. Total amount: {total}')
         return redirect(self.success_url)
-
-
-# from django.shortcuts import render, redirect, get_object_or_404
-# from .models import Category
-# from .forms import CategoryForm
-
-# def category_list(request):
-#     categories = Category.objects.all()
-#     return render(request, 'inventory/category_list.html', {'categories': categories})
-
-
-# def category_create(request):
-#     if request.method == 'POST':
-#         form = CategoryForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('inventory:category_list')
-#     else:
-#         form = CategoryForm()
-
-#     return render(request, 'inventory/category_form.html', {'form': form})
-
-
-# def category_update(request, id):
-#     category = get_object_or_404(Category, id=id)
-
-#     if request.method == 'POST':
-#         form = CategoryForm(request.POST, instance=category)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('inventory:category_list')
-#     else:
-#         form = CategoryForm(instance=category)
-
-#     return render(request, 'inventory/category_form.html', {'form': form})
-
-
-# def category_delete(request, id):
-#     category = get_object_or_404(Category, id=id)
-
-#     if request.method == 'POST':
-#         category.delete()
-#         return redirect('inventory:category_list')
-
-#     return render(request, 'inventory/category_confirm_delete.html', {'category': category})
-
-
-# from .models import Product
-# from .forms import ProductForm
-
-# def product_list(request):
-#     products = Product.objects.all()
-#     return render(request, 'inventory/product_list.html', {'products': products})
-
-
-# def product_create(request):
-#     if request.method == 'POST':
-#         form = ProductForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('inventory:product_list')
-#     else:
-#         form = ProductForm()
-
-#     return render(request, 'inventory/product_form.html', {'form': form})
-
-
-# def product_update(request, id):
-#     product = get_object_or_404(Product, id=id)
-
-#     if request.method == 'POST':
-#         form = ProductForm(request.POST, instance=product)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('inventory:product_list')
-#     else:
-#         form = ProductForm(instance=product)
-
-#     return render(request, 'inventory/product_form.html', {'form': form})
-
-
-# def product_delete(request, id):
-#     product = get_object_or_404(Product, id=id)
-
-#     if request.method == 'POST':
-#         product.delete()
-#         return redirect('inventory:product_list')
-
-#     return render(request, 'inventory/product_confirm_delete.html', {'product': product})
-
-
-# from .models import Purchase
-
-# def purchase_list(request):
-#     purchases = Purchase.objects.all().order_by('-id')
-#     return render(request, 'inventory/purchase_list.html', {'purchases': purchases})
-
-
-# def purchase_create(request):
-#     if request.method == 'POST':
-#         form = PurchaseForm(request.POST)
-#         if form.is_valid():
-#             purchase = form.save(commit=False)
-
-#             product = purchase.product
-#             product.quantity += purchase.quantity
-#             product.save()
-
-#             purchase.save()
-#             return redirect('inventory:purchase_list')
-#     else:
-#         form = PurchaseForm()
-
-#     return render(request, 'inventory/purchase_form.html', {'form': form})
-
-
-
-# from .models import Sale
-
-# def sale_list(request):
-#     sales = Sale.objects.all().order_by('-id')
-#     return render(request, 'inventory/sale_list.html', {'sales': sales})
-
-
-# def sale_create(request):
-#     if request.method == 'POST':
-#         form = SaleForm(request.POST)
-#         if form.is_valid():
-#             sale = form.save(commit=False)
-
-#             product = sale.product
-
-#             if product.quantity < sale.quantity:
-#                 return render(request, 'inventory/sale_form.html', {
-#                     'form': form,
-#                     'error': 'Not enough stock'
-#                 })
-
-#             product.quantity -= sale.quantity
-#             product.save()
-
-#             sale.save()
-#             return redirect('inventory:sale_list')
-#     else:
-#         form = SaleForm()
-
-#     return render(request, 'inventory/sale_form.html', {'form': form})
-
-
-
-# def dashboard(request):
-#     products = Product.objects.all()
-#     categories = Category.objects.all()
-
-#     return render(request, 'inventory/dashboard.html', {
-#         'product_count': products.count(),
-#         'category_count': categories.count(),
-#     })

@@ -1,7 +1,8 @@
 from django import forms
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth import get_user_model
+from .models import UserProfile
 
-from .models import User, UserProfile
+User = get_user_model()
 
 
 class UserProfileForm(forms.ModelForm):
@@ -42,9 +43,9 @@ class RegisterForm(forms.Form):
 
     def save(self):
         data = self.cleaned_data
-        user = User.objects.create(
+        user = User.objects.create_user(
             username=data['username'],
-            password=make_password(data['password']),
+            password=data['password'],
             email=data['email'],
             role=data['role'],
         )

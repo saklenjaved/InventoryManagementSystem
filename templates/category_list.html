@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>All Categories</h2>
+<br>
+<div class="container">
+    <div class="row">
+        <div class="col-md-7">    
+        <a href="{% url 'add_category' %}" class="btn btn-primary">Add Category</a> <br><br>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                    <tr>
+                        <td>{{cat.id}}</td>
+                        <td>{{cat.name}} - {{cat.total_stock}}</td>
+                        <td>
+                            <form method="POST">
+                                {% csrf_token %}
+                            <a href="{% url 'update_category' cat.id %}" class="btn btn-success btn-sm">Edit</a>
+                            <a href="{% url 'delete_category' cat.id %}" class="btn btn-sm btn-danger">Delete</a>
+                            </form>
+                            
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% if request.session.role == 'admin' %}
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Back</a>
+        {% else %}
+            <a href="{% url 'home' %}" class="btn btn-secondary">Back</a>
+
+        {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock  %}

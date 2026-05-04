@@ -9,9 +9,29 @@
     padding: 2rem 1.5rem;
     margin-bottom: 1.75rem;
     box-shadow: var(--shadow-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: space-between;
+    align-items: flex-start;
   }
+  .shop-hero__main { flex: 1; min-width: 13rem; }
   .shop-hero h1 { margin: 0 0 0.5rem; font-size: 1.75rem; letter-spacing: -0.03em; color: #fff; }
-  .shop-hero p { margin: 0; opacity: 0.92; max-width: 36rem; font-size: 0.95rem; }
+  .shop-hero__main p { margin: 0; opacity: 0.92; max-width: 36rem; font-size: 0.95rem; }
+  .weather-widget {
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: calc(var(--radius) - 2px);
+    padding: 1rem 1.15rem;
+    min-width: 11.5rem;
+    backdrop-filter: blur(6px);
+  }
+  .weather-widget__title { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.85; margin: 0 0 0.35rem; }
+  .weather-widget__loc { font-size: 0.9rem; font-weight: 700; margin: 0 0 0.25rem; color: #fff; }
+  .weather-widget__temp { font-size: 1.65rem; font-weight: 800; margin: 0; letter-spacing: -0.04em; color: #fff; line-height: 1.15; }
+  .weather-widget__meta { font-size: 0.78rem; opacity: 0.88; margin: 0.35rem 0 0; line-height: 1.35; }
+  .weather-widget__foot { font-size: 0.62rem; opacity: 0.65; margin: 0.65rem 0 0; }
+  .weather-widget--error { opacity: 0.85; font-size: 0.8rem; }
   .shop-filters {
     display: flex;
     flex-wrap: wrap;
@@ -51,7 +71,7 @@
   .product-card__body { padding: 1.1rem 1.2rem 1.25rem; flex: 1; display: flex; flex-direction: column; }
   .product-card__cat { font-size: 0.6875rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; color: var(--brand); margin-bottom: 0.35rem; }
   .product-card__title { font-size: 1.05rem; font-weight: 700; margin: 0 0 0.5rem; color: var(--ink); letter-spacing: -0.02em; }
-  .product-card__desc { font-size: 0.8125rem; color: var(--muted); margin: 0 0 1rem; flex: 1; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  .product-card__desc { font-size: 0.8125rem; color: var(--muted); margin: 0 0 1rem; flex: 1; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 3; line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
   .product-card__meta { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1rem; }
   .product-card__price { font-size: 1.2rem; font-weight: 700; color: var(--ink); }
   .product-card__stock { font-size: 0.75rem; color: var(--muted); font-weight: 600; }
@@ -63,8 +83,28 @@
 {% block content %}
 <div class="page">
   <div class="shop-hero">
-    <h1>IMS Shop</h1>
-    <p>Browse products without signing in, add items to cart, then checkout. Login is required only at checkout. Admins use the same sign-in page.</p>
+    <div class="shop-hero__main">
+      <h1>IMS Shop</h1>
+      <p>Browse products without signing in, add items to cart, then checkout. Login is required only at checkout. Admins use the same sign-in page.</p>
+    </div>
+    {% if weather.ok %}
+    <aside class="weather-widget" aria-label="Current weather">
+      <p class="weather-widget__title">Live weather</p>
+      <p class="weather-widget__loc">{{ weather.location_label }}</p>
+      <p class="weather-widget__temp">{{ weather.temperature_c }}°C</p>
+      <p class="weather-widget__meta">{{ weather.summary }} · Wind {{ weather.wind_kmh }} km/h</p>
+      {% if weather.time_utc %}
+      <p class="weather-widget__meta">Observed {{ weather.time_utc }} UTC</p>
+      {% endif %}
+      <p class="weather-widget__foot">Data: {{ weather.source }}</p>
+    </aside>
+    {% else %}
+    <aside class="weather-widget weather-widget--error" aria-label="Weather unavailable">
+      <p class="weather-widget__title">Weather</p>
+      <p class="weather-widget__meta">{{ weather.error }}</p>
+      <p class="weather-widget__foot">Source: Open-Meteo (offline)</p>
+    </aside>
+    {% endif %}
   </div>
 
   <div class="shop-filters">

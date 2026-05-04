@@ -1,13 +1,18 @@
 from urllib.parse import urlencode
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
+from api.tasks import enqueue_signup_notification
+
 from .forms import LoginForm, RegisterForm, UserProfileForm
-from .models import LoginActivity, User, UserProfile
+from .models import LoginActivity, UserProfile
+
+User = get_user_model()
 
 
 @require_http_methods(['GET', 'POST'])
@@ -66,7 +71,8 @@ def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            form.save()
+            user = form.save()
+            enqueue_signup_notification(email=user.email, username=user.username)
             messages.success(
                 request,
                 'Account created. Sign in with your username, email, and password.',
@@ -124,4 +130,4 @@ def profile_view(request):
             'is_admin': user.role == 'admin',
         },
     )
-    
+

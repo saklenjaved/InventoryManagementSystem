@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+
+<h2>Sell Records</h2>
+<br>
+<a href="{% url 'sell' %}" class="btn btn-primary">Add Sells</a>
+<br><br>
+<table class="table table-bordered">
+    <tr>
+        <th>Product</th>
+        <th>Customer</th>
+        <th>Quantity</th>
+        <th>Price</th>
+        <th>Total</th>
+        <th>Date</th>
+    </tr>
+
+    {% for s in sells %}
+    <tr>
+        <td>{{ s.product.name }}</td>
+        <td>{{ s.customer.username }}</td>
+        <td>{{ s.quantity }}</td>
+        <td>{{ s.price }}</td>
+        <td>{{ s.total }}</td>
+        <td>{{ s.date }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td colspan="4"><strong>Grand Total</strong></td>
+        <td><strong>{{ grand_total }}</strong></td>
+    </tr>
+</table>
+
+<br>
+<a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Back</a>
+
+{% endblock  %}

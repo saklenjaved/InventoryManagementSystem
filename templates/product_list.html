@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>All Products</h2>
+<br> 
+<a href="{% url 'add_product' %}" class="btn btn-primary">Add Products</a>
+<br> <br>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Category</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{product.id}}</td>
+            <td>{{product.name}}</td>
+            <td>{{product.category__name}}</td>
+            <td>{{product.price}}</td>
+            <td>{{product.stock}}</td>
+            <td>
+                <form method="POST">
+                    <a href="{% url 'update_product' product.id %}" class="btn btn-sm btn-success">Edit</a>
+                    <a href="{% url 'delete_product' product.id %}" class="btn btn-sm btn-danger">Delete</a>
+                </form>
+            </td>
+        </tr>
+        
+       {% endfor %}
+    </tbody>
+</table>
+{% if request.session.role == 'admin' %}
+    <a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Back</a>
+{% else %}
+    <a href="{% url 'home' %}" class="btn btn-secondary">Back</a>
+
+{% endif %}
+{% endblock  %}

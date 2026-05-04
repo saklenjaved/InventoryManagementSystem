@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>Your Cart</h2>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Product</th>
+        <th>Price</th>
+        <th>Qty</th>
+        <th>Subtotal</th>
+        <th>Actions</th>
+    </tr>
+
+    {% for item in cart_items %}
+    <tr>
+        <td>{{ item.product.name }}</td>
+        <td>{{ item.product.price }}</td>
+        <td>{{ item.quantity }}</td>
+        <td>{{ item.subtotal }}</td>
+        <td>
+            <a href="{% url 'update_cart' item.id %}" class="btn btn-success btn-sm">Edit</a>
+            <a href="{% url 'delete_cart' item.id %}" class="btn btn-danger btn-sm">Delete</a>
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Total: {{ total }}</h3> <br>
+
+<a href="{% url 'buy' %}" class="btn btn-success">Buy Now</a> <br>
+<br>
+<a href="{% url 'home' %}" class="btn btn-secondary">Back</a>
+
+{% endblock  %}
+
+
+
+

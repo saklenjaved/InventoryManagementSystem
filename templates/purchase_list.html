@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2>All Purchases</h2>
+<br>
+<a href="{% url 'purchase' %}" class="btn btn-primary">Purchase</a>
+<br> <br>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+            <th>Buyer</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for purchase in purchases %}
+            <tr>
+                <td>{{purchase.id}}</td>
+                <td>{{purchase.product.name}}</td>
+                <td>{{purchase.quantity}}</td>
+                <td>{{purchase.price}}</td>
+                <td>{{purchase.total_amount}}</td>
+                <td>{{purchase.buyer}}</td>
+                <td>{{purchase.date}}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<br>
+<a href="{% url 'admin_dashboard' %}" class="btn btn-secondary">Back</a>
+{% endblock  %}
